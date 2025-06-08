@@ -9,27 +9,17 @@ A local AI assistant for students that helps with homework, essay writing, and p
 - 🧮 Math and physics problem solving
 - 🖼️ Image recognition and analysis
 - 🔒 Privacy-focused (all processing done locally)
-- ⌨️ Quick access via keyboard shortcut
+- ⌨️ Quick access via keyboard shortcut (Ctrl+Shift+A)
 
-## Project Structure
-
-```
-/frontend         → Chat UI (Tauri)
-/backend          → LLM, OCR, Math Solver
-/models           → LLMs (GGML format), OCR data
-/utils            → Task routing, file handling
-```
-
-## Setup
-
-### Prerequisites
+## Prerequisites
 
 - Python 3.8+
 - Node.js 16+
 - Rust (for Tauri)
 - Tesseract OCR
+- Git
 
-### Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -37,8 +27,9 @@ git clone https://github.com/yourusername/Veswo---Bot.git
 cd Veswo---Bot
 ```
 
-2. Set up Python environment:
+2. Install Python dependencies:
 ```bash
+cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -46,23 +37,80 @@ pip install -r requirements.txt
 
 3. Install frontend dependencies:
 ```bash
-cd frontend
+cd ../frontend
 npm install
 ```
 
-4. Build and run:
-```bash
-npm run tauri dev
-```
+4. Install Tesseract OCR:
+- macOS: `brew install tesseract`
+- Ubuntu: `sudo apt-get install tesseract-ocr`
+- Windows: Download from [GitHub](https://github.com/UB-Mannheim/tesseract/wiki)
 
 ## Development
 
-This project is built with:
-- Frontend: Tauri (Rust + Web)
-- Backend: Python
-- AI: llama.cpp, Tesseract OCR
-- Math: SymPy
+1. Start the development server:
+```bash
+# From the project root
+./run.sh
+```
+
+This will start both the Python backend and Tauri frontend.
+
+2. Build for production:
+```bash
+cd frontend
+npm run tauri build
+```
+
+## Project Structure
+
+```
+/frontend         → Tauri + React frontend
+  /src           → React components
+  /src-tauri     → Tauri backend
+/backend         → Python FastAPI server
+  /utils         → Utility modules
+/models          → AI models
+```
+
+## Features in Detail
+
+### Screen Reading
+- Uses Tesseract OCR for text recognition
+- Supports image capture and analysis
+- Can process mathematical equations
+
+### Math Solving
+- Symbolic math with SymPy
+- Step-by-step solutions
+- Support for equations and expressions
+
+### Essay Writing
+- Multiple essay types (persuasive, analytical, etc.)
+- Different writing tones
+- Outline generation
+
+### Privacy
+- All processing done locally
+- No data sent to external servers
+- Optional encrypted storage
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## License
 
-MIT License 
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- Tesseract OCR
+- SymPy
+- Tauri
+- React
+- FastAPI 

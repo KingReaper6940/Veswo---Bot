@@ -1,0 +1,21 @@
+[package]
+name = "veswo-assistant"
+version = "0.1.0"
+description = "AI Study Assistant"
+authors = ["Your Name"]
+license = "MIT"
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "1.5", features = ["shell-open", "global-shortcut", "window-all", "fs-all"] }
+tokio = { version = "1.0", features = ["full"] }
+reqwest = { version = "0.11", features = ["json"] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"] 
