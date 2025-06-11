@@ -19,10 +19,39 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
-.env
+
+# Virtual Environment
 venv/
 ENV/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+logs/
+log/
+
+# Temporary files
+*.tmp
+*.temp
+.coverage
+htmlcov/
+
+# Distribution
+dist/
+build/
+*.pyc
 
 # Node
 node_modules/
@@ -30,27 +59,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
-.DS_Store
-dist/
-dist-ssr/
-*.local
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-.project
-.classpath
-.settings/
 
 # Tauri
 target/
 src-tauri/target/
-
-# Logs
-logs/
-*.log
 
 # Model files
 models/*.bin
