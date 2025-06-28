@@ -1,29 +1,44 @@
 {
   "name": "veswo-assistant",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "AI-powered study assistant with math solving, essay writing, and image analysis",
+  "keywords": ["ai", "study", "assistant", "math", "essay", "image-analysis", "education"],
+  "author": "Veswo Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veswo/veswo-assistant"
+  },
+  "homepage": "https://veswo.ai",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:preview": "tauri preview"
   },
   "dependencies": {
+    "@heroicons/react": "^2.0.18",
     "@tauri-apps/api": "^1.5.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-markdown": "^8.0.7",
-    "react-syntax-highlighter": "^15.5.0",
-    "tailwindcss": "^3.3.0",
-    "@headlessui/react": "^1.7.17",
-    "@heroicons/react": "^2.0.18"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.0",
-    "@vitejs/plugin-react": "^4.0.0",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.3",
     "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.24",
-    "vite": "^4.3.9"
+    "postcss": "^8.4.27",
+    "tailwindcss": "^3.3.3",
+    "vite": "^4.4.4"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   }
 } 

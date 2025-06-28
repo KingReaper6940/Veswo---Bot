@@ -7,7 +7,7 @@
   },
   "package": {
     "productName": "Veswo Assistant",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -25,6 +25,11 @@
       "fs": {
         "all": true,
         "scope": ["**"]
+      },
+      "http": {
+        "all": true,
+        "request": true,
+        "scope": ["http://localhost:8000/*", "http://127.0.0.1:8000/*"]
       }
     },
     "bundle": {
@@ -37,7 +42,29 @@
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
-      ]
+      ],
+      "resources": [],
+      "externalBin": [],
+      "copyright": "Copyright (c) 2024 Veswo Team",
+      "category": "Education",
+      "shortDescription": "AI Study Assistant",
+      "longDescription": "Veswo Assistant is an AI-powered study companion that helps with math problems, essay writing, code analysis, and image recognition.",
+      "deb": {
+        "depends": []
+      },
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": null,
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null,
+        "minimumSystemVersion": "10.13"
+      },
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
     },
     "security": {
       "csp": null
@@ -47,13 +74,15 @@
         "fullscreen": false,
         "resizable": true,
         "title": "Veswo Assistant",
-        "width": 800,
-        "height": 600,
-        "minWidth": 400,
-        "minHeight": 300,
+        "width": 1200,
+        "height": 800,
+        "minWidth": 800,
+        "minHeight": 600,
         "decorations": true,
         "transparent": false,
-        "center": true
+        "center": true,
+        "visible": true,
+        "alwaysOnTop": false
       }
     ]
   }

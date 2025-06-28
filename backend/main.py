@@ -7,9 +7,7 @@ import os
 import json
 from dotenv import load_dotenv
 
-from utils.screen_recognizer import ScreenRecognizer
-from utils.problem_solver import ProblemSolver, Problem
-from utils.essay_writer import EssayWriter
+from utils.ai_model import GPT2Assistant
 
 # Load environment variables
 load_dotenv()
@@ -18,12 +16,12 @@ load_dotenv()
 PORT = int(os.getenv("PORT", 8000))
 HOST = os.getenv("HOST", "0.0.0.0")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-CORS_ORIGINS = json.loads(os.getenv("CORS_ORIGINS", '["http://localhost:3000", "http://localhost:8000"]'))
+CORS_ORIGINS = json.loads(os.getenv("CORS_ORIGINS", '["http://localhost:3000", "http://localhost:8000", "http://localhost:1420", "tauri://localhost"]'))
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Local AI Assistant API",
-    description="API for local AI assistant with screen recognition, problem solving, and essay writing capabilities",
+    title="Veswo Assistant API",
+    description="AI-powered study assistant with GPT-2 for math solving, essay writing, and image analysis",
     version="1.0.0"
 )
 
@@ -36,17 +34,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize components
-screen_recognizer = ScreenRecognizer()
-problem_solver = ProblemSolver()
-essay_writer = EssayWriter()
+# Initialize GPT-2 Assistant
+print("Loading GPT-2 model...")
+ai_assistant = GPT2Assistant()
+print("GPT-2 model loaded successfully!")
 
 # Request/Response Models
-class ScreenAnalysisRequest(BaseModel):
-    region: Optional[Tuple[int, int, int, int]] = None  # (left, top, width, height)
-
-class ProblemRequest(BaseModel):
-    problem_text: str
+class ChatRequest(BaseModel):
+    message: str
 
 class EssayRequest(BaseModel):
     topic: str
@@ -54,79 +49,206 @@ class EssayRequest(BaseModel):
     tone: str = "formal"
     length: str = "medium"
 
+class ImageAnalysisRequest(BaseModel):
+    image_description: str
+    question: str
+
+class CodeHelpRequest(BaseModel):
+    code: str
+    question: str
+
+class ScienceHelpRequest(BaseModel):
+    subject: str
+    question: str
+
 # API Endpoints
 @app.get("/")
 async def root():
     """Root endpoint returning API information"""
     return {
-        "name": "Local AI Assistant API",
+        "name": "Veswo Assistant API",
         "version": "1.0.0",
-        "status": "operational"
+        "status": "operational",
+        "description": "AI-powered study assistant with GPT-2 for math solving, essay writing, and image analysis",
+        "model": "GPT-2"
     }
 
-@app.post("/api/screen/analyze")
-async def analyze_screen(request: ScreenAnalysisRequest):
-    """Analyze screen content"""
-    try:
-        analysis = screen_recognizer.analyze_screen_content(request.region)
-        return analysis
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "timestamp": "2024-01-01T00:00:00Z",
+        "version": "1.0.0",
+        "model": "GPT-2"
+    }
 
-@app.post("/api/screen/find-text")
-async def find_text(request: ScreenAnalysisRequest, search_text: str):
-    """Find specific text on screen"""
+@app.post("/api/chat")
+async def chat(request: ChatRequest):
+    """General chat endpoint using GPT-2"""
     try:
-        matches = screen_recognizer.find_text_on_screen(search_text, request.region)
-        return {"matches": matches}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/screen/detect-equations")
-async def detect_equations(request: ScreenAnalysisRequest):
-    """Detect mathematical equations on screen"""
-    try:
-        equations = screen_recognizer.detect_math_equations(request.region)
-        return {"equations": equations}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/api/solve/problem")
-async def solve_problem(request: ProblemRequest):
-    """Solve a math or physics problem"""
-    try:
-        # Parse the problem
-        problem = problem_solver.parse_problem(request.problem_text)
+        message = request.message.lower().strip()
         
-        # Solve the problem
-        solution = problem_solver.solve_problem(problem)
+        # Check for fallback responses first
+        fallback = ai_assistant.get_fallback_response(request.message)
+        if fallback:
+            return {
+                "response": fallback,
+                "method": "Fallback Response"
+            }
         
+        # Check if it's a math problem
+        if any(keyword in message for keyword in ['solve', 'calculate', 'find', 'equation', 'math', '=', '+', '-', '*', '/', '^']):
+            try:
+                # Extract the actual problem from the message
+                problem_text = request.message
+                if 'solve:' in problem_text.lower():
+                    problem_text = problem_text.split('solve:', 1)[1].strip()
+                elif 'solve' in problem_text.lower():
+                    problem_text = problem_text.split('solve', 1)[1].strip()
+                
+                # Use GPT-2 to solve the math problem
+                result = ai_assistant.solve_math_problem(problem_text)
+                
+                return {
+                    "response": result.get("solution", "Could not solve the problem"),
+                    "steps": result.get("steps", []),
+                    "method": result.get("method", "GPT-2 AI Model")
+                }
+            except Exception as e:
+                return {
+                    "response": f"I tried to solve your math problem but encountered an error: {str(e)}. Please try rephrasing your question.",
+                    "steps": [],
+                    "method": "GPT-2 AI Model"
+                }
+        
+        # Check if it's an essay request
+        elif any(keyword in message for keyword in ['write', 'essay', 'article', 'paper']):
+            try:
+                # Extract topic from message
+                topic = request.message.replace('write', '').replace('essay', '').replace('about', '').strip()
+                if topic:
+                    essay = ai_assistant.write_essay(topic=topic, length="medium")
+                    return {
+                        "response": essay.get("content", "Could not generate essay"),
+                        "metadata": essay.get("metadata", {}),
+                        "method": "GPT-2 AI Model"
+                    }
+            except Exception as e:
+                return {
+                    "response": f"I tried to write an essay but encountered an error: {str(e)}. Please try again.",
+                    "steps": [],
+                    "method": "GPT-2 AI Model"
+                }
+        
+        # Check if it's a code help request
+        elif any(keyword in message for keyword in ['code', 'program', 'debug', 'function', 'class']):
+            try:
+                response = ai_assistant.help_with_code("", request.message)
+                return {
+                    "response": response,
+                    "method": "GPT-2 AI Model"
+                }
+            except Exception as e:
+                return {
+                    "response": f"I tried to help with code but encountered an error: {str(e)}. Please try again.",
+                    "method": "GPT-2 AI Model"
+                }
+        
+        # Check if it's a science help request
+        elif any(keyword in message for keyword in ['physics', 'chemistry', 'biology', 'science', 'experiment']):
+            try:
+                # Determine subject from message
+                subject = "science"
+                if 'physics' in message:
+                    subject = "physics"
+                elif 'chemistry' in message:
+                    subject = "chemistry"
+                elif 'biology' in message:
+                    subject = "biology"
+                
+                response = ai_assistant.science_help(subject, request.message)
+                return {
+                    "response": response,
+                    "method": "GPT-2 AI Model"
+                }
+            except Exception as e:
+                return {
+                    "response": f"I tried to help with science but encountered an error: {str(e)}. Please try again.",
+                    "method": "GPT-2 AI Model"
+                }
+        
+        # Default response for general questions using GPT-2
+        else:
+            response = ai_assistant.general_chat(request.message)
+            return {
+                "response": response,
+                "method": "GPT-2 AI Model"
+            }
+            
+    except Exception as e:
         return {
-            "problem_type": problem.type.value,
-            "solution": solution
+            "response": f"Sorry, I encountered an error: {str(e)}. Please try again.",
+            "method": "GPT-2 AI Model"
         }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/write/essay")
 async def write_essay(request: EssayRequest):
-    """Generate an essay"""
+    """Generate an essay using GPT-2"""
     try:
-        essay = essay_writer.generate_essay(
+        essay = ai_assistant.write_essay(
             topic=request.topic,
             essay_type=request.essay_type,
-            tone=request.tone,
             length=request.length
         )
         return essay
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/analyze/image")
+async def analyze_image(request: ImageAnalysisRequest):
+    """Analyze image content using GPT-2"""
+    try:
+        response = ai_assistant.analyze_image_content(
+            request.image_description,
+            request.question
+        )
+        return {
+            "response": response,
+            "method": "GPT-2 AI Model"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/help/code")
+async def help_with_code(request: CodeHelpRequest):
+    """Help with code using GPT-2"""
+    try:
+        response = ai_assistant.help_with_code(
+            request.code,
+            request.question
+        )
+        return {
+            "response": response,
+            "method": "GPT-2 AI Model"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/help/science")
+async def help_with_science(request: ScienceHelpRequest):
+    """Help with science using GPT-2"""
+    try:
+        response = ai_assistant.science_help(
+            request.subject,
+            request.question
+        )
+        return {
+            "response": response,
+            "method": "GPT-2 AI Model"
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
-    # Run the application
-    uvicorn.run(
-        "main:app",
-        host=HOST,
-        port=PORT,
-        reload=DEBUG  # Enable auto-reload during development
-    ) 
+    uvicorn.run(app, host=HOST, port=PORT) 

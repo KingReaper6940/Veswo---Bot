@@ -19,3 +19,15 @@ python main.py
 if [ -n "$VIRTUAL_ENV" ]; then
     deactivate
 fi 
+
+# Run the Tkinter app
+python app.py
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+cd frontend/src-tauri
+cargo build
+
+cd ..
+npm install
+npm run tauri dev 

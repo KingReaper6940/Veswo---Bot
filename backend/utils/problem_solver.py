@@ -85,7 +85,10 @@ class ProblemSolver:
                 return self._solve_physics_problem(problem)
                 
         except Exception as e:
-            raise Exception(f"Problem solving failed: {str(e)}")
+            return {
+                'solution': {},
+                'steps': [f"Problem solving failed: {str(e)}"]
+            }
     
     def _determine_problem_type(self, text: str) -> ProblemType:
         """
@@ -120,7 +123,22 @@ class ProblemSolver:
         """
         equations = []
         
-        # Find all potential equations
+        # First, try to find explicit equations with = sign
+        if '=' in text:
+            # Split by = and try to create equation
+            parts = text.split('=')
+            if len(parts) == 2:
+                try:
+                    left = parts[0].strip()
+                    right = parts[1].strip()
+                    # Clean up the expressions
+                    left = left.replace(' ', '')  # Remove spaces
+                    right = right.replace(' ', '')
+                    equations.append(Eq(sympy.sympify(left), sympy.sympify(right)))
+                except:
+                    pass
+        
+        # Also try the original pattern matching
         for pattern in self.math_patterns.values():
             matches = re.finditer(pattern, text)
             for match in matches:
@@ -160,6 +178,22 @@ class ProblemSolver:
         """
         Solve a math problem.
         """
+        # Initialize result
+        result = {
+            'solution': {},
+            'steps': []
+        }
+        
+        # Check if we have equations to solve
+        if not problem.equations:
+            result['steps'].append("No equations found in the problem")
+            return result
+            
+        # Check if we have unknown variables
+        if not problem.unknown_variables:
+            result['steps'].append("No unknown variables found in the problem")
+            return result
+        
         # Substitute known values into equations
         equations = []
         for eq in problem.equations:
@@ -169,18 +203,25 @@ class ProblemSolver:
             equations.append(eq)
         
         # Solve system of equations
-        solutions = solve(equations, [problem.variables[var] for var in problem.unknown_variables])
-        
-        # Format solution
-        result = {
-            'solution': {},
-            'steps': []
-        }
-        
-        if isinstance(solutions, list):
-            for i, var in enumerate(problem.unknown_variables):
-                result['solution'][var] = float(solutions[i])
-                result['steps'].append(f"{var} = {solutions[i]}")
+        try:
+            solutions = solve(equations, [problem.variables[var] for var in problem.unknown_variables])
+            
+            # Format solution
+            if isinstance(solutions, list) and len(solutions) == len(problem.unknown_variables):
+                for i, var in enumerate(problem.unknown_variables):
+                    if i < len(solutions):  # Add bounds checking
+                        result['solution'][var] = float(solutions[i])
+                        result['steps'].append(f"{var} = {solutions[i]}")
+            elif isinstance(solutions, dict):
+                # Handle case where solve returns a dictionary
+                for var, value in solutions.items():
+                    result['solution'][var] = float(value)
+                    result['steps'].append(f"{var} = {value}")
+            else:
+                result['steps'].append("Could not find a unique solution")
+                
+        except Exception as e:
+            result['steps'].append(f"Error solving equations: {str(e)}")
         
         return result
     
