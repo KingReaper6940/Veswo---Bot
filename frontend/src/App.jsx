@@ -14,6 +14,7 @@ import {
   PhotoIcon,
   CodeBracketIcon
 } from '@heroicons/react/24/outline';
+import './App.css';
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -26,6 +27,18 @@ function App() {
   const [essayType, setEssayType] = useState('analytical');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [gpt2Status, setGpt2Status] = useState({ ready: false, loading: true, error: null });
+  const [essayResult, setEssayResult] = useState(null);
+  const [imageDescription, setImageDescription] = useState('');
+  const [imageQuestion, setImageQuestion] = useState('');
+  const [imageResult, setImageResult] = useState(null);
+  const [codeInput, setCodeInput] = useState('');
+  const [codeQuestion, setCodeQuestion] = useState('');
+  const [codeResult, setCodeResult] = useState(null);
+  const [scienceSubject, setScienceSubject] = useState('physics');
+  const [scienceQuestion, setScienceQuestion] = useState('');
+  const [scienceResult, setScienceResult] = useState(null);
 
   useEffect(() => {
     // Listen for global shortcut
@@ -41,6 +54,30 @@ function App() {
     };
   }, []);
 
+  // Check GPT-2 status on component mount
+  useEffect(() => {
+    checkGpt2Status();
+  }, []);
+
+  const checkGpt2Status = async () => {
+    try {
+      const response = await fetch('http://localhost:8000/api/status');
+      const data = await response.json();
+      
+      if (data.gpt2_ready) {
+        setGpt2Status({ ready: true, loading: false, error: null });
+      } else {
+        setGpt2Status({ ready: false, loading: true, error: data.error });
+        // Retry after 2 seconds
+        setTimeout(checkGpt2Status, 2000);
+      }
+    } catch (error) {
+      setGpt2Status({ ready: false, loading: true, error: 'Cannot connect to backend' });
+      // Retry after 2 seconds
+      setTimeout(checkGpt2Status, 2000);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!input.trim() || isProcessing) return;
@@ -54,10 +91,15 @@ function App() {
 
     try {
       // Send message to backend
-      const response = await invoke('chat', { message: userMessage });
-      
-      // Add assistant response to chat
-      setMessages(prev => [...prev, { role: 'assistant', content: response }]);
+      const response = await fetch('http://localhost:8000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage })
+      });
+
+      const data = await response.json();
+      const assistantMessage = { role: 'assistant', content: data.response, method: data.method };
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error:', error);
       setMessages(prev => [...prev, { 
@@ -74,10 +116,16 @@ function App() {
     
     setIsProcessing(true);
     try {
-      const response = await invoke('chat', { message: `Solve this problem: ${problemInput}` });
+      const response = await fetch('http://localhost:8000/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `Solve this problem: ${problemInput}` })
+      });
+
+      const data = await response.json();
       setMessages(prev => [...prev, 
         { role: 'user', content: `Problem: ${problemInput}` },
-        { role: 'assistant', content: response }
+        { role: 'assistant', content: data.response, method: data.method }
       ]);
       setProblemInput('');
     } catch (error) {
@@ -96,12 +144,20 @@ function App() {
     
     setIsProcessing(true);
     try {
-      const response = await invoke('chat', { 
-        message: `Write a ${essayType} essay about ${essayTopic} with ${essayLength} length` 
+      const response = await fetch('http://localhost:8000/api/write/essay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic: essayTopic,
+          essay_type: essayType,
+          length: essayLength
+        })
       });
+
+      const data = await response.json();
       setMessages(prev => [...prev, 
         { role: 'user', content: `Write essay about: ${essayTopic}` },
-        { role: 'assistant', content: response }
+        { role: 'assistant', content: data.response, method: data.method }
       ]);
       setEssayTopic('');
     } catch (error) {
@@ -148,14 +204,15 @@ function App() {
       const formData = new FormData();
       formData.append('image', selectedImage);
       
-      const response = await invoke('analyze_image', { 
-        imageData: imagePreview,
-        question: input || "What's in this image?"
+      const response = await fetch('http://localhost:8000/api/analyze/image', {
+        method: 'POST',
+        body: formData
       });
-      
+
+      const data = await response.json();
       setMessages(prev => [...prev, 
         { role: 'user', content: `[Image Analysis] ${input || "What's in this image?"}` },
-        { role: 'assistant', content: response }
+        { role: 'assistant', content: data.response, method: data.method }
       ]);
       setInput('');
     } catch (error) {
@@ -169,6 +226,52 @@ function App() {
     }
   };
 
+  const helpWithCode = async () => {
+    if (!codeQuestion.trim() || isProcessing) return;
+
+    setIsProcessing(true);
+    try {
+      const response = await fetch('http://localhost:8000/api/help/code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: codeInput,
+          question: codeQuestion
+        })
+      });
+
+      const data = await response.json();
+      setCodeResult(data);
+    } catch (error) {
+      setCodeResult({ response: 'Error helping with code. Please try again.' });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const helpWithScience = async () => {
+    if (!scienceQuestion.trim() || isProcessing) return;
+
+    setIsProcessing(true);
+    try {
+      const response = await fetch('http://localhost:8000/api/help/science', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: scienceSubject,
+          question: scienceQuestion
+        })
+      });
+
+      const data = await response.json();
+      setScienceResult(data);
+    } catch (error) {
+      setScienceResult({ response: 'Error helping with science. Please try again.' });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const tabs = [
     { id: 'chat', name: 'Chat', icon: ChatBubbleLeftIcon },
     { id: 'math', name: 'Math Solver', icon: CalculatorIcon },
@@ -177,6 +280,50 @@ function App() {
     { id: 'image', name: 'Image Analysis', icon: PhotoIcon },
     { id: 'code', name: 'Code Helper', icon: CodeBracketIcon },
   ];
+
+  // Loading screen while GPT-2 initializes
+  if (gpt2Status.loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Initializing Veswo Assistant</h2>
+          <p className="text-gray-600 mb-4">Loading GPT-2 AI model...</p>
+          {gpt2Status.error && (
+            <p className="text-red-500 text-sm">Error: {gpt2Status.error}</p>
+          )}
+          <div className="mt-4">
+            <div className="flex space-x-2 justify-center">
+              <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+          <p className="text-xs text-gray-500 mt-4">This may take a few minutes on first run</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error screen if GPT-2 failed to initialize
+  if (!gpt2Status.ready && gpt2Status.error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="text-red-500 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Initialization Failed</h2>
+          <p className="text-gray-600 mb-4">GPT-2 model could not be loaded</p>
+          <p className="text-red-500 text-sm mb-4">{gpt2Status.error}</p>
+          <button 
+            onClick={checkGpt2Status}
+            className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-indigo-100">

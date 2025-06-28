@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional, List, Tuple
 import uvicorn
 import os
 import json
+import time
 from dotenv import load_dotenv
 
 from utils.ai_model import GPT2Assistant
@@ -34,10 +35,47 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize GPT-2 Assistant
-print("Loading GPT-2 model...")
-ai_assistant = GPT2Assistant()
-print("GPT-2 model loaded successfully!")
+# Global variable to track GPT-2 initialization status
+gpt2_ready = False
+ai_assistant = None
+initialization_error = None
+
+def initialize_gpt2():
+    """Initialize GPT-2 model with proper error handling"""
+    global gpt2_ready, ai_assistant, initialization_error
+    
+    try:
+        print("🔄 Initializing GPT-2 model...")
+        print("📥 Downloading model files (this may take a few minutes on first run)...")
+        
+        # Initialize GPT-2 Assistant
+        ai_assistant = GPT2Assistant()
+        
+        # Test the model with a simple query
+        print("🧪 Testing GPT-2 model...")
+        test_response = ai_assistant.general_chat("test")
+        if test_response and "error" not in test_response.lower():
+            gpt2_ready = True
+            print("✅ GPT-2 model initialized successfully!")
+            print(f"🖥️  Running on: {ai_assistant.device}")
+            print(f"🧠 Model: {ai_assistant.model_name}")
+            return True
+        else:
+            initialization_error = "GPT-2 model test failed"
+            print(f"❌ GPT-2 model test failed: {test_response}")
+            return False
+            
+    except Exception as e:
+        initialization_error = str(e)
+        print(f"❌ Failed to initialize GPT-2 model: {e}")
+        return False
+
+# Initialize GPT-2 on startup
+@app.on_event("startup")
+async def startup_event():
+    """Initialize GPT-2 when the server starts"""
+    global gpt2_ready
+    gpt2_ready = initialize_gpt2()
 
 # Request/Response Models
 class ChatRequest(BaseModel):
@@ -61,6 +99,12 @@ class ScienceHelpRequest(BaseModel):
     subject: str
     question: str
 
+class StatusResponse(BaseModel):
+    status: str
+    gpt2_ready: bool
+    error: Optional[str] = None
+    model_info: Optional[Dict[str, Any]] = None
+
 # API Endpoints
 @app.get("/")
 async def root():
@@ -68,24 +112,52 @@ async def root():
     return {
         "name": "Veswo Assistant API",
         "version": "1.0.0",
-        "status": "operational",
+        "status": "operational" if gpt2_ready else "initializing",
         "description": "AI-powered study assistant with GPT-2 for math solving, essay writing, and image analysis",
-        "model": "GPT-2"
+        "model": "GPT-2",
+        "gpt2_ready": gpt2_ready
     }
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
-        "status": "healthy",
+        "status": "healthy" if gpt2_ready else "initializing",
         "timestamp": "2024-01-01T00:00:00Z",
         "version": "1.0.0",
-        "model": "GPT-2"
+        "model": "GPT-2",
+        "gpt2_ready": gpt2_ready,
+        "error": initialization_error if not gpt2_ready else None
     }
+
+@app.get("/api/status")
+async def get_status():
+    """Get detailed status of the GPT-2 model"""
+    if gpt2_ready and ai_assistant:
+        model_info = {
+            "model_name": ai_assistant.model_name,
+            "device": str(ai_assistant.device),
+            "status": "ready"
+        }
+    else:
+        model_info = None
+    
+    return StatusResponse(
+        status="ready" if gpt2_ready else "initializing",
+        gpt2_ready=gpt2_ready,
+        error=initialization_error if not gpt2_ready else None,
+        model_info=model_info
+    )
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     """General chat endpoint using GPT-2"""
+    if not gpt2_ready:
+        raise HTTPException(
+            status_code=503, 
+            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+        )
+    
     try:
         message = request.message.lower().strip()
         
@@ -195,6 +267,12 @@ async def chat(request: ChatRequest):
 @app.post("/api/write/essay")
 async def write_essay(request: EssayRequest):
     """Generate an essay using GPT-2"""
+    if not gpt2_ready:
+        raise HTTPException(
+            status_code=503, 
+            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+        )
+    
     try:
         essay = ai_assistant.write_essay(
             topic=request.topic,
@@ -208,6 +286,12 @@ async def write_essay(request: EssayRequest):
 @app.post("/api/analyze/image")
 async def analyze_image(request: ImageAnalysisRequest):
     """Analyze image content using GPT-2"""
+    if not gpt2_ready:
+        raise HTTPException(
+            status_code=503, 
+            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+        )
+    
     try:
         response = ai_assistant.analyze_image_content(
             request.image_description,
@@ -223,6 +307,12 @@ async def analyze_image(request: ImageAnalysisRequest):
 @app.post("/api/help/code")
 async def help_with_code(request: CodeHelpRequest):
     """Help with code using GPT-2"""
+    if not gpt2_ready:
+        raise HTTPException(
+            status_code=503, 
+            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+        )
+    
     try:
         response = ai_assistant.help_with_code(
             request.code,
@@ -238,6 +328,12 @@ async def help_with_code(request: CodeHelpRequest):
 @app.post("/api/help/science")
 async def help_with_science(request: ScienceHelpRequest):
     """Help with science using GPT-2"""
+    if not gpt2_ready:
+        raise HTTPException(
+            status_code=503, 
+            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+        )
+    
     try:
         response = ai_assistant.science_help(
             request.subject,
