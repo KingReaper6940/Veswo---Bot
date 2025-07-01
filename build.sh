@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Veswo Assistant Build Script
-# This script builds the application for distribution
+# This script builds the complete application package
 
 set -e
 
@@ -32,61 +32,48 @@ print_error() {
 }
 
 # Check if we're in the right directory
-if [ ! -f "requirements.txt" ]; then
-    print_error "Please run this script from the project root directory"
+if [ ! -f "start.sh" ]; then
+    echo "❌ Please run this script from the project root directory"
     exit 1
 fi
 
-# Check prerequisites
-print_status "Checking prerequisites..."
+# Make sure all scripts are executable
+chmod +x start.sh
+chmod +x launcher.sh
+chmod +x run.sh
+chmod +x dev.sh
 
-# Check Python
-if ! command -v python3 &> /dev/null; then
-    print_error "Python 3 is required but not installed"
-    exit 1
-fi
-
-# Check Node.js
-if ! command -v node &> /dev/null; then
-    print_error "Node.js is required but not installed"
-    exit 1
-fi
-
-# Check npm
-if ! command -v npm &> /dev/null; then
-    print_error "npm is required but not installed"
-    exit 1
-fi
-
-# Check Rust
-if ! command -v cargo &> /dev/null; then
-    print_error "Rust is required but not installed"
-    exit 1
-fi
-
-print_success "All prerequisites are installed"
-
-# Setup Python environment
-print_status "Setting up Python environment..."
+# Check if virtual environment exists
 if [ ! -d "venv" ]; then
+    echo "🐍 Creating virtual environment..."
     python3 -m venv venv
-    print_success "Created virtual environment"
 fi
 
+# Activate virtual environment
+echo "🐍 Activating virtual environment..."
 source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-print_success "Python dependencies installed"
 
-# Setup frontend
-print_status "Setting up frontend..."
+# Install backend dependencies
+echo "📦 Installing backend dependencies..."
+pip install -r requirements.txt
+
+# Install frontend dependencies
+echo "📦 Installing frontend dependencies..."
 cd frontend
 npm install
-print_success "Frontend dependencies installed"
 
-# Build the application
-print_status "Building Veswo Assistant..."
+# Build the Tauri application
+echo "🔨 Building Tauri application..."
 npm run tauri build
+
+echo "✅ Build completed!"
+echo ""
+echo "📦 Your application has been built and is ready to run."
+echo "🎯 To launch the application:"
+echo "   - Double-click the .app file in frontend/src-tauri/target/release/bundle/macos/"
+echo "   - Or run: ./start.sh (for development)"
+echo ""
+echo "📁 Build artifacts are in: frontend/src-tauri/target/release/bundle/"
 
 # Check if build was successful
 if [ $? -eq 0 ]; then

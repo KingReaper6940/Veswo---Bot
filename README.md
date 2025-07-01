@@ -49,46 +49,30 @@ An AI-powered study companion powered by GPT-2 that helps with math problems, es
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- **Node.js** (v16 or higher)
-- **Rust** (for Tauri backend)
-- **Python** (v3.8 or higher)
-- **4GB+ RAM** (for GPT-2 model)
+### Option 1: One-Click Launch (Recommended)
 
-### Installation
-
-1. **Clone the repository**
+1. **Build the application** (one-time setup):
    ```bash
-   git clone https://github.com/veswo/veswo-assistant.git
-   cd veswo-assistant
+   ./build.sh
    ```
 
-2. **Set up Python backend**
-   ```bash
-   # Create virtual environment
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Install dependencies (this will download GPT-2 model ~500MB)
-   pip install -r requirements.txt
-   ```
+2. **Launch the application**:
+   - Double-click the `.app` file in `frontend/src-tauri/target/release/bundle/macos/`
+   - The app will automatically start the backend and frontend
 
-3. **Set up frontend**
-   ```bash
-   cd frontend
-   npm install
-   ```
+### Option 2: Development Mode
 
-4. **Start the application**
+1. **Start everything with one command**:
    ```bash
-   # Use the automated startup script
    ./start.sh
-   
-   # Or manually:
-   # Terminal 1: Backend
+   ```
+
+2. **Or start components individually**:
+   ```bash
+   # Terminal 1: Start backend
    cd backend && source ../venv/bin/activate && uvicorn main:app --host 0.0.0.0 --port 8000 --reload
    
-   # Terminal 2: Frontend
+   # Terminal 2: Start frontend
    cd frontend && npm run tauri dev
    ```
 

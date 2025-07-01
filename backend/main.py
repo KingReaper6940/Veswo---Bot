@@ -8,7 +8,7 @@ import json
 import time
 from dotenv import load_dotenv
 
-from utils.ai_model import GPT2Assistant
+from utils.ai_model import Llama3Assistant
 
 # Load environment variables
 load_dotenv()
@@ -22,7 +22,7 @@ CORS_ORIGINS = json.loads(os.getenv("CORS_ORIGINS", '["http://localhost:3000", "
 # Initialize FastAPI app
 app = FastAPI(
     title="Veswo Assistant API",
-    description="AI-powered study assistant with GPT-2 for math solving, essay writing, and image analysis",
+    description="AI-powered study assistant with Llama 3 7B for math solving, essay writing, and image analysis",
     version="1.0.0"
 )
 
@@ -35,47 +35,38 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Global variable to track GPT-2 initialization status
-gpt2_ready = False
+# Global variable to track Llama 3 initialization status
+llama_ready = False
 ai_assistant = None
 initialization_error = None
 
-def initialize_gpt2():
-    """Initialize GPT-2 model with proper error handling"""
-    global gpt2_ready, ai_assistant, initialization_error
-    
+def initialize_llama():
+    """Initialize Llama 3 model with proper error handling"""
+    global llama_ready, ai_assistant, initialization_error
     try:
-        print("🔄 Initializing GPT-2 model...")
+        print("🔄 Initializing Llama 3 7B model...")
         print("📥 Downloading model files (this may take a few minutes on first run)...")
-        
-        # Initialize GPT-2 Assistant
-        ai_assistant = GPT2Assistant()
-        
-        # Test the model with a simple query
-        print("🧪 Testing GPT-2 model...")
+        ai_assistant = Llama3Assistant()
+        print("🧪 Testing Llama 3 model...")
         test_response = ai_assistant.general_chat("test")
         if test_response and "error" not in test_response.lower():
-            gpt2_ready = True
-            print("✅ GPT-2 model initialized successfully!")
-            print(f"🖥️  Running on: {ai_assistant.device}")
-            print(f"🧠 Model: {ai_assistant.model_name}")
+            llama_ready = True
+            print("✅ Llama 3 7B model initialized successfully!")
             return True
         else:
-            initialization_error = "GPT-2 model test failed"
-            print(f"❌ GPT-2 model test failed: {test_response}")
+            initialization_error = "Llama 3 model test failed"
+            print(f"❌ Llama 3 model test failed: {test_response}")
             return False
-            
     except Exception as e:
         initialization_error = str(e)
-        print(f"❌ Failed to initialize GPT-2 model: {e}")
+        print(f"❌ Failed to initialize Llama 3 model: {e}")
         return False
 
-# Initialize GPT-2 on startup
+# Initialize Llama 3 on startup
 @app.on_event("startup")
 async def startup_event():
-    """Initialize GPT-2 when the server starts"""
-    global gpt2_ready
-    gpt2_ready = initialize_gpt2()
+    global llama_ready
+    llama_ready = initialize_llama()
 
 # Request/Response Models
 class ChatRequest(BaseModel):
@@ -101,7 +92,7 @@ class ScienceHelpRequest(BaseModel):
 
 class StatusResponse(BaseModel):
     status: str
-    gpt2_ready: bool
+    llama_ready: bool
     error: Optional[str] = None
     model_info: Optional[Dict[str, Any]] = None
 
@@ -112,50 +103,49 @@ async def root():
     return {
         "name": "Veswo Assistant API",
         "version": "1.0.0",
-        "status": "operational" if gpt2_ready else "initializing",
-        "description": "AI-powered study assistant with GPT-2 for math solving, essay writing, and image analysis",
-        "model": "GPT-2",
-        "gpt2_ready": gpt2_ready
+        "status": "operational" if llama_ready else "initializing",
+        "description": "AI-powered study assistant with Llama 3 7B for math solving, essay writing, and image analysis",
+        "model": "Llama 3 7B",
+        "llama_ready": llama_ready
     }
 
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
     return {
-        "status": "healthy" if gpt2_ready else "initializing",
+        "status": "healthy" if llama_ready else "initializing",
         "timestamp": "2024-01-01T00:00:00Z",
         "version": "1.0.0",
-        "model": "GPT-2",
-        "gpt2_ready": gpt2_ready,
-        "error": initialization_error if not gpt2_ready else None
+        "model": "Llama 3 7B",
+        "llama_ready": llama_ready,
+        "error": initialization_error if not llama_ready else None
     }
 
 @app.get("/api/status")
 async def get_status():
-    """Get detailed status of the GPT-2 model"""
-    if gpt2_ready and ai_assistant:
+    """Get detailed status of the Llama 3 model"""
+    if llama_ready and ai_assistant:
         model_info = {
-            "model_name": ai_assistant.model_name,
-            "device": str(ai_assistant.device),
+            "model_name": getattr(ai_assistant, "model_name", "Llama 3 7B"),
             "status": "ready"
         }
     else:
         model_info = None
     
     return StatusResponse(
-        status="ready" if gpt2_ready else "initializing",
-        gpt2_ready=gpt2_ready,
-        error=initialization_error if not gpt2_ready else None,
+        status="ready" if llama_ready else "initializing",
+        llama_ready=llama_ready,
+        error=initialization_error if not llama_ready else None,
         model_info=model_info
     )
 
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
-    """General chat endpoint using GPT-2"""
-    if not gpt2_ready:
+    """General chat endpoint using Llama 3"""
+    if not llama_ready or ai_assistant is None:
         raise HTTPException(
-            status_code=503, 
-            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+            status_code=503,
+            detail="Llama 3 model is still initializing. Please wait a moment and try again."
         )
     
     try:
@@ -179,19 +169,19 @@ async def chat(request: ChatRequest):
                 elif 'solve' in problem_text.lower():
                     problem_text = problem_text.split('solve', 1)[1].strip()
                 
-                # Use GPT-2 to solve the math problem
+                # Use Llama 3 to solve the math problem
                 result = ai_assistant.solve_math_problem(problem_text)
                 
                 return {
                     "response": result.get("solution", "Could not solve the problem"),
                     "steps": result.get("steps", []),
-                    "method": result.get("method", "GPT-2 AI Model")
+                    "method": result.get("method", "Llama 3 7B AI Model")
                 }
             except Exception as e:
                 return {
                     "response": f"I tried to solve your math problem but encountered an error: {str(e)}. Please try rephrasing your question.",
                     "steps": [],
-                    "method": "GPT-2 AI Model"
+                    "method": "Llama 3 7B AI Model"
                 }
         
         # Check if it's an essay request
@@ -204,13 +194,13 @@ async def chat(request: ChatRequest):
                     return {
                         "response": essay.get("content", "Could not generate essay"),
                         "metadata": essay.get("metadata", {}),
-                        "method": "GPT-2 AI Model"
+                        "method": "Llama 3 7B AI Model"
                     }
             except Exception as e:
                 return {
                     "response": f"I tried to write an essay but encountered an error: {str(e)}. Please try again.",
                     "steps": [],
-                    "method": "GPT-2 AI Model"
+                    "method": "Llama 3 7B AI Model"
                 }
         
         # Check if it's a code help request
@@ -219,12 +209,12 @@ async def chat(request: ChatRequest):
                 response = ai_assistant.help_with_code("", request.message)
                 return {
                     "response": response,
-                    "method": "GPT-2 AI Model"
+                    "method": "Llama 3 7B AI Model"
                 }
             except Exception as e:
                 return {
                     "response": f"I tried to help with code but encountered an error: {str(e)}. Please try again.",
-                    "method": "GPT-2 AI Model"
+                    "method": "Llama 3 7B AI Model"
                 }
         
         # Check if it's a science help request
@@ -242,35 +232,35 @@ async def chat(request: ChatRequest):
                 response = ai_assistant.science_help(subject, request.message)
                 return {
                     "response": response,
-                    "method": "GPT-2 AI Model"
+                    "method": "Llama 3 7B AI Model"
                 }
             except Exception as e:
                 return {
                     "response": f"I tried to help with science but encountered an error: {str(e)}. Please try again.",
-                    "method": "GPT-2 AI Model"
+                    "method": "Llama 3 7B AI Model"
                 }
         
-        # Default response for general questions using GPT-2
+        # Default response for general questions using Llama 3
         else:
             response = ai_assistant.general_chat(request.message)
             return {
                 "response": response,
-                "method": "GPT-2 AI Model"
+                "method": "Llama 3 7B AI Model"
             }
             
     except Exception as e:
         return {
             "response": f"Sorry, I encountered an error: {str(e)}. Please try again.",
-            "method": "GPT-2 AI Model"
+            "method": "Llama 3 7B AI Model"
         }
 
 @app.post("/api/write/essay")
 async def write_essay(request: EssayRequest):
-    """Generate an essay using GPT-2"""
-    if not gpt2_ready:
+    """Generate an essay using Llama 3"""
+    if not llama_ready or ai_assistant is None:
         raise HTTPException(
-            status_code=503, 
-            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+            status_code=503,
+            detail="Llama 3 model is still initializing. Please wait a moment and try again."
         )
     
     try:
@@ -285,11 +275,11 @@ async def write_essay(request: EssayRequest):
 
 @app.post("/api/analyze/image")
 async def analyze_image(request: ImageAnalysisRequest):
-    """Analyze image content using GPT-2"""
-    if not gpt2_ready:
+    """Analyze image content using Llama 3"""
+    if not llama_ready or ai_assistant is None:
         raise HTTPException(
-            status_code=503, 
-            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+            status_code=503,
+            detail="Llama 3 model is still initializing. Please wait a moment and try again."
         )
     
     try:
@@ -299,18 +289,18 @@ async def analyze_image(request: ImageAnalysisRequest):
         )
         return {
             "response": response,
-            "method": "GPT-2 AI Model"
+            "method": "Llama 3 7B AI Model"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/help/code")
 async def help_with_code(request: CodeHelpRequest):
-    """Help with code using GPT-2"""
-    if not gpt2_ready:
+    """Help with code using Llama 3"""
+    if not llama_ready or ai_assistant is None:
         raise HTTPException(
-            status_code=503, 
-            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+            status_code=503,
+            detail="Llama 3 model is still initializing. Please wait a moment and try again."
         )
     
     try:
@@ -320,18 +310,18 @@ async def help_with_code(request: CodeHelpRequest):
         )
         return {
             "response": response,
-            "method": "GPT-2 AI Model"
+            "method": "Llama 3 7B AI Model"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/help/science")
 async def help_with_science(request: ScienceHelpRequest):
-    """Help with science using GPT-2"""
-    if not gpt2_ready:
+    """Help with science using Llama 3"""
+    if not llama_ready or ai_assistant is None:
         raise HTTPException(
-            status_code=503, 
-            detail="GPT-2 model is still initializing. Please wait a moment and try again."
+            status_code=503,
+            detail="Llama 3 model is still initializing. Please wait a moment and try again."
         )
     
     try:
@@ -341,7 +331,7 @@ async def help_with_science(request: ScienceHelpRequest):
         )
         return {
             "response": response,
-            "method": "GPT-2 AI Model"
+            "method": "Llama 3 7B AI Model"
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

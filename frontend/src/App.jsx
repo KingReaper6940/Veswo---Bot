@@ -14,7 +14,6 @@ import {
   PhotoIcon,
   CodeBracketIcon
 } from '@heroicons/react/24/outline';
-import './App.css';
 
 function App() {
   const [messages, setMessages] = useState([]);
@@ -27,18 +26,11 @@ function App() {
   const [essayType, setEssayType] = useState('analytical');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [gpt2Status, setGpt2Status] = useState({ ready: false, loading: true, error: null });
-  const [essayResult, setEssayResult] = useState(null);
-  const [imageDescription, setImageDescription] = useState('');
-  const [imageQuestion, setImageQuestion] = useState('');
-  const [imageResult, setImageResult] = useState(null);
+  const [llamaStatus, setLlamaStatus] = useState({ ready: false, loading: true, error: null });
   const [codeInput, setCodeInput] = useState('');
   const [codeQuestion, setCodeQuestion] = useState('');
-  const [codeResult, setCodeResult] = useState(null);
   const [scienceSubject, setScienceSubject] = useState('physics');
   const [scienceQuestion, setScienceQuestion] = useState('');
-  const [scienceResult, setScienceResult] = useState(null);
 
   useEffect(() => {
     // Listen for global shortcut
@@ -54,27 +46,27 @@ function App() {
     };
   }, []);
 
-  // Check GPT-2 status on component mount
+  // Check Llama status on component mount
   useEffect(() => {
-    checkGpt2Status();
+    checkLlamaStatus();
   }, []);
 
-  const checkGpt2Status = async () => {
+  const checkLlamaStatus = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/status');
       const data = await response.json();
       
-      if (data.gpt2_ready) {
-        setGpt2Status({ ready: true, loading: false, error: null });
+      if (data.llama_ready) {
+        setLlamaStatus({ ready: true, loading: false, error: null });
       } else {
-        setGpt2Status({ ready: false, loading: true, error: data.error });
+        setLlamaStatus({ ready: false, loading: true, error: data.error });
         // Retry after 2 seconds
-        setTimeout(checkGpt2Status, 2000);
+        setTimeout(checkLlamaStatus, 2000);
       }
     } catch (error) {
-      setGpt2Status({ ready: false, loading: true, error: 'Cannot connect to backend' });
+      setLlamaStatus({ ready: false, loading: true, error: 'Cannot connect to backend' });
       // Retry after 2 seconds
-      setTimeout(checkGpt2Status, 2000);
+      setTimeout(checkLlamaStatus, 2000);
     }
   };
 
@@ -241,9 +233,11 @@ function App() {
       });
 
       const data = await response.json();
-      setCodeResult(data);
+      setMessages(prev => [...prev, { role: 'user', content: `Code: ${codeInput}\nQuestion: ${codeQuestion}` }, { role: 'assistant', content: data.response, method: data.method }]);
+      setCodeInput('');
+      setCodeQuestion('');
     } catch (error) {
-      setCodeResult({ response: 'Error helping with code. Please try again.' });
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error helping with code. Please try again.' }]);
     } finally {
       setIsProcessing(false);
     }
@@ -264,9 +258,10 @@ function App() {
       });
 
       const data = await response.json();
-      setScienceResult(data);
+      setMessages(prev => [...prev, { role: 'user', content: `Subject: ${scienceSubject}\nQuestion: ${scienceQuestion}` }, { role: 'assistant', content: data.response, method: data.method }]);
+      setScienceQuestion('');
     } catch (error) {
-      setScienceResult({ response: 'Error helping with science. Please try again.' });
+      setMessages(prev => [...prev, { role: 'assistant', content: 'Error helping with science. Please try again.' }]);
     } finally {
       setIsProcessing(false);
     }
@@ -281,16 +276,16 @@ function App() {
     { id: 'code', name: 'Code Helper', icon: CodeBracketIcon },
   ];
 
-  // Loading screen while GPT-2 initializes
-  if (gpt2Status.loading) {
+  // Loading screen while Llama initializes
+  if (llamaStatus.loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Initializing Veswo Assistant</h2>
-          <p className="text-gray-600 mb-4">Loading GPT-2 AI model...</p>
-          {gpt2Status.error && (
-            <p className="text-red-500 text-sm">Error: {gpt2Status.error}</p>
+          <p className="text-gray-600 mb-4">Loading Llama AI model...</p>
+          {llamaStatus.error && (
+            <p className="text-red-500 text-sm">Error: {llamaStatus.error}</p>
           )}
           <div className="mt-4">
             <div className="flex space-x-2 justify-center">
@@ -305,17 +300,17 @@ function App() {
     );
   }
 
-  // Error screen if GPT-2 failed to initialize
-  if (!gpt2Status.ready && gpt2Status.error) {
+  // Error screen if Llama failed to initialize
+  if (!llamaStatus.ready && llamaStatus.error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center">
         <div className="text-center max-w-md">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Initialization Failed</h2>
-          <p className="text-gray-600 mb-4">GPT-2 model could not be loaded</p>
-          <p className="text-red-500 text-sm mb-4">{gpt2Status.error}</p>
+          <p className="text-gray-600 mb-4">Llama model could not be loaded</p>
+          <p className="text-red-500 text-sm mb-4">{llamaStatus.error}</p>
           <button 
-            onClick={checkGpt2Status}
+            onClick={checkLlamaStatus}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
           >
             Retry
@@ -387,12 +382,15 @@ function App() {
                   }`}
                 >
                   <div
-                    className={`max-w-lg rounded-lg px-4 py-3 shadow-sm ${
+                    className={`max-w-lg rounded-lg px-4 py-3 shadow-sm flex items-end space-x-2 ${
                       message.role === 'user'
-                        ? 'bg-indigo-600 text-white'
+                        ? 'bg-indigo-600 text-white flex-row-reverse'
                         : 'bg-white text-gray-900 border border-gray-200'
                     }`}
                   >
+                    {message.role === 'assistant' && (
+                      <span className="inline-block align-bottom text-2xl mr-2">🤖</span>
+                    )}
                     <div className="text-sm">{message.content}</div>
                   </div>
                 </div>
@@ -400,11 +398,9 @@ function App() {
             )}
             {isProcessing && (
               <div className="flex justify-start">
-                <div className="bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
-                    <span className="text-sm">Processing...</span>
-                  </div>
+                <div className="bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-3 shadow-sm flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
+                  <span className="text-sm">Processing...</span>
                 </div>
               </div>
             )}
@@ -656,44 +652,18 @@ function App() {
           )}
 
           {activeTab === 'chat' && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <ChatBubbleLeftIcon className="h-6 w-6 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
-              </div>
-              <p className="text-sm text-gray-600">
-                Use these quick actions to get started.
-              </p>
-              
-              <div className="space-y-3">
-                <button
-                  onClick={() => setInput('Hello! How can you help me with my studies?')}
-                  className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">Get Started</div>
-                  <div className="text-sm text-gray-500">Learn what I can help you with</div>
-                </button>
-                
-                <button
-                  onClick={() => setInput('Solve: 2x + 5 = 13')}
-                  className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">Math Example</div>
-                  <div className="text-sm text-gray-500">Try a simple equation</div>
-                </button>
-                
-                <button
-                  onClick={() => setInput('Write an essay about climate change')}
-                  className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
-                >
-                  <div className="font-medium text-gray-900">Essay Example</div>
-                  <div className="text-sm text-gray-500">Generate an essay</div>
-                </button>
-              </div>
+            <div className="space-y-4 text-center">
+              <ChatBubbleLeftIcon className="mx-auto h-10 w-10 text-indigo-400" />
+              <h2 className="text-lg font-semibold text-gray-900">Welcome to Veswo Assistant</h2>
+              <p className="text-sm text-gray-600">Start chatting or select a tool to get started!</p>
             </div>
           )}
         </div>
       </div>
+      {/* Footer */}
+      <footer className="w-full text-center py-2 text-xs text-gray-400 bg-white border-t border-gray-100">
+        Powered by Llama 3 7B
+      </footer>
     </div>
   );
 }
