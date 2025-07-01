@@ -12,7 +12,9 @@ import {
   BeakerIcon,
   BookOpenIcon,
   PhotoIcon,
-  CodeBracketIcon
+  CodeBracketIcon,
+  MoonIcon,
+  SunIcon
 } from '@heroicons/react/24/outline';
 
 function App() {
@@ -31,6 +33,7 @@ function App() {
   const [codeQuestion, setCodeQuestion] = useState('');
   const [scienceSubject, setScienceSubject] = useState('physics');
   const [scienceQuestion, setScienceQuestion] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
     // Listen for global shortcut
@@ -50,6 +53,14 @@ function App() {
   useEffect(() => {
     checkLlamaStatus();
   }, []);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
 
   const checkLlamaStatus = async () => {
     try {
@@ -321,19 +332,30 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className={darkMode ? 'dark' : ''}>
       {/* Header */}
-      <div className="bg-white shadow-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      <div className="bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <AcademicCapIcon className="h-8 w-8 text-indigo-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Veswo Assistant</h1>
-              <p className="text-sm text-gray-500">Your AI Study Companion</p>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Veswo Assistant</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Your AI Study Companion</p>
             </div>
           </div>
+          <button
+            onClick={() => setDarkMode((d) => !d)}
+            className="ml-4 p-2 rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors"
+            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {darkMode ? (
+              <SunIcon className="h-6 w-6 text-yellow-400" />
+            ) : (
+              <MoonIcon className="h-6 w-6 text-gray-700" />
+            )}
+          </button>
         </div>
       </div>
 
@@ -661,7 +683,7 @@ function App() {
         </div>
       </div>
       {/* Footer */}
-      <footer className="w-full text-center py-2 text-xs text-gray-400 bg-white border-t border-gray-100">
+      <footer className="w-full text-center py-2 text-xs text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
         Powered by Llama 3 7B
       </footer>
     </div>
