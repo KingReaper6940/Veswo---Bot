@@ -1,23 +1,23 @@
 # Veswo Assistant 🧠
 
-An AI-powered study companion powered by GPT-2 that helps with math problems, essay writing, code analysis, and image recognition - **100% local and private**.
+An AI-powered study companion powered by **Meta Llama 3 7B** that helps with math problems, essay writing, code analysis, and image recognition - **100% local and private**.
 
 ![Veswo Assistant](https://img.shields.io/badge/Version-1.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Platform](https://img.shields.io/badge/Platform-Cross--Platform-orange)
-![AI Model](https://img.shields.io/badge/AI%20Model-GPT--2-purple)
+![AI Model](https://img.shields.io/badge/AI%20Model-Llama%203%207B-purple)
 ![Privacy](https://img.shields.io/badge/Privacy-100%25%20Local-red)
 
 ## ✨ Features
 
 ### 🧮 **Math Problem Solver**
-- Solve complex equations step-by-step using GPT-2
+- Solve complex equations step-by-step using Llama 3
 - Handle arithmetic expressions instantly
 - Support for algebra, calculus, and more
 - Handwritten math recognition via screenshots
 
 ### 📝 **Essay Writer**
-- Generate well-structured essays on any topic using GPT-2
+- Generate well-structured essays on any topic using Llama 3
 - Multiple essay types: analytical, persuasive, descriptive, narrative
 - Customizable length and tone
 - Professional writing assistance
@@ -30,7 +30,7 @@ An AI-powered study companion powered by GPT-2 that helps with math problems, es
 - General image content understanding
 
 ### 💻 **Code Helper**
-- Code explanation and documentation using GPT-2
+- Code explanation and documentation using Llama 3
 - Bug detection and debugging assistance
 - Code generation for common tasks
 - Programming language support
@@ -41,9 +41,12 @@ An AI-powered study companion powered by GPT-2 that helps with math problems, es
 - Biology concepts
 - Scientific formula assistance
 
+### 🌙 **Dark Mode**
+- Toggle dark/light mode with a single click for comfortable day or night use
+
 ### 🔒 **Privacy & Security**
 - **100% Local**: No data sent to external servers
-- **Open Source**: GPT-2 model is completely transparent
+- **Open Source**: Llama 3 model is completely transparent
 - **Offline Capable**: Works without internet connection
 - **No Data Collection**: Your conversations stay private
 
@@ -58,7 +61,7 @@ An AI-powered study companion powered by GPT-2 that helps with math problems, es
 
 2. **Launch the application**:
    - Double-click the `.app` file in `frontend/src-tauri/target/release/bundle/macos/`
-   - The app will automatically start the backend and frontend
+   - The app will automatically start the backend and frontend, and load the Llama 3 model
 
 ### Option 2: Development Mode
 
@@ -95,27 +98,30 @@ This will create platform-specific installers in `frontend/src-tauri/target/rele
 ## 🎯 Usage Examples
 
 ### Math Problems
-- Type: `2+3` → Get instant answer using GPT-2
+- Type: `2+3` → Get instant answer using Llama 3
 - Type: `Solve: 2x + 5 = 13` → Get step-by-step solution
-- Screenshot a math problem → Get OCR + GPT-2 solution
+- Screenshot a math problem → Get OCR + Llama 3 solution
 
 ### Essay Writing
 1. Go to "Essay Writer" tab
 2. Enter topic: "Climate Change"
 3. Select type: "Analytical"
 4. Choose length: "Medium"
-5. Click "Write Essay" → GPT-2 generates content
+5. Click "Write Essay" → Llama 3 generates content
 
 ### Image Analysis
 1. Go to "Image Analysis" tab
 2. Take screenshot or upload image
 3. Ask: "What's in this image?"
-4. Get GPT-2 analysis
+4. Get Llama 3 analysis
 
 ### Code Help
 1. Go to "Code Helper" tab
 2. Use quick actions or type code questions
-3. Get GPT-2 explanations, debugging help, or code generation
+3. Get Llama 3 explanations, debugging help, or code generation
+
+### Dark Mode
+- Click the moon/sun icon in the header to toggle dark/light mode instantly
 
 ## 🏗️ Architecture
 
@@ -124,15 +130,16 @@ Veswo Assistant
 ├── Frontend (React + Tauri)
 │   ├── Modern UI with Tailwind CSS
 │   ├── Tabbed interface for different features
-│   └── Real-time chat with AI
+│   ├── Real-time chat with AI
+│   └── Dark mode toggle
 ├── Backend (FastAPI + Python)
-│   ├── GPT-2 AI Model (500MB local model)
-│   ├── Math problem solver (GPT-2 powered)
-│   ├── Essay writer (GPT-2 powered)
-│   ├── Image analysis (GPT-2 powered)
-│   └── Code analysis (GPT-2 powered)
+│   ├── Llama 3 7B AI Model (local model)
+│   ├── Math problem solver (Llama 3 powered)
+│   ├── Essay writer (Llama 3 powered)
+│   ├── Image analysis (Llama 3 powered)
+│   └── Code analysis (Llama 3 powered)
 └── AI Integration
-    ├── GPT-2 Language Model
+    ├── Llama 3 Language Model
     ├── Local inference (no internet required)
     └── Privacy-focused processing
 ```
@@ -141,8 +148,8 @@ Veswo Assistant
 
 - **Frontend**: React, Tauri, Tailwind CSS
 - **Backend**: FastAPI, Python
-- **AI/ML**: GPT-2 (OpenAI), Transformers, PyTorch
-- **Math**: GPT-2 mathematical reasoning
+- **AI/ML**: Meta Llama 3 7B, Transformers, PyTorch
+- **Math**: Llama 3 mathematical reasoning
 - **Image Processing**: PIL, OpenCV
 - **Packaging**: Tauri bundler
 
@@ -154,9 +161,9 @@ Veswo Assistant
 
 ## 🔒 Privacy Features
 
-- **No Internet Required**: GPT-2 runs completely locally
+- **No Internet Required**: Llama 3 runs completely locally
 - **No Data Collection**: Your conversations never leave your device
-- **Open Source Model**: GPT-2 is transparent and auditable
+- **Open Source Model**: Llama 3 is transparent and auditable
 - **Offline Capable**: Works without any external services
 - **No API Keys**: No need for OpenAI or other API keys
 
@@ -174,7 +181,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **OpenAI** for the GPT-2 model
+- **Meta** for the Llama 3 model
 - **Hugging Face** for the Transformers library
 - **Tauri** for the cross-platform framework
 - **FastAPI** for the high-performance backend
@@ -188,4 +195,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ by the Veswo Team - Powered by GPT-2** 
+**Made with ❤️ by the Veswo Team - Powered by Llama 3 7B** 
