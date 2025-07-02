@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Veswo Assistant Startup Script
+# veswo1-bot Startup Script
 # This script starts both the backend and frontend with proper GPT-2 initialization
 
-echo "🚀 Starting Veswo Assistant with GPT-2..."
+echo "🚀 Starting veswo1-bot with GPT-2..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -131,17 +131,17 @@ cd ..
 
 # Function to cleanup on exit
 cleanup() {
-    echo -e "\n${YELLOW}🛑 Shutting down Veswo Assistant...${NC}"
+    echo -e "\n${YELLOW}🛑 Shutting down veswo1-bot...${NC}"
     kill $BACKEND_PID 2>/dev/null
     kill $FRONTEND_PID 2>/dev/null
-    echo -e "${GREEN}✅ Veswo Assistant stopped${NC}"
+    echo -e "${GREEN}✅ veswo1-bot stopped${NC}"
     exit 0
 }
 
 # Set up signal handlers
 trap cleanup SIGINT SIGTERM
 
-echo -e "${GREEN}🎉 Veswo Assistant is starting!${NC}"
+echo -e "${GREEN}🎉 veswo1-bot is starting!${NC}"
 echo -e "${BLUE}📱 Frontend will open automatically${NC}"
 echo -e "${BLUE}🌐 Backend API: http://localhost:8000${NC}"
 echo -e "${BLUE}🧠 GPT-2 Status: $([ "$GPT2_READY" = true ] && echo "Ready" || echo "Initializing")${NC}"

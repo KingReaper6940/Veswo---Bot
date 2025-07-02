@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Veswo Assistant Development Script
+# veswo1-bot Development Script
 # This script starts the development environment
 
 set -e
 
-echo "🚀 Starting Veswo Assistant Development Environment..."
+echo "🚀 Starting veswo1-bot Development Environment..."
 
 # Colors for output
 RED='\033[0;31m'

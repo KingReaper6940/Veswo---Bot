@@ -54,7 +54,7 @@ class Llama3Assistant:
         
         # General knowledge
         elif "hello" in message_lower or "hi" in message_lower:
-            return "Hello! I'm Veswo Assistant, powered by Llama 3 7B. I can help you with math problems, essays, code, and science questions. How can I assist you today?"
+            return "Hello! I'm veswo1-bot, powered by Llama 3 7B. I can help you with math problems, essays, code, and science questions. How can I assist you today?"
         elif "how are you" in message_lower:
             return "I'm functioning well! I'm here to help you with your studies. What would you like to work on?"
         elif "what can you do" in message_lower or "help" in message_lower:

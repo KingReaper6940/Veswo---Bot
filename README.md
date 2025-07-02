@@ -1,8 +1,8 @@
-# Veswo Assistant 🧠
+# veswo1-bot 🧠
 
 An AI-powered study companion powered by **Meta Llama 3 7B** that helps with math problems, essay writing, code analysis, and image recognition - **100% local and private**.
 
-![Veswo Assistant](https://img.shields.io/badge/Version-1.0.0-blue)
+![veswo1-bot](https://img.shields.io/badge/Version-1.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Platform](https://img.shields.io/badge/Platform-Cross--Platform-orange)
 ![AI Model](https://img.shields.io/badge/AI%20Model-Llama%203%207B-purple)
@@ -126,7 +126,7 @@ This will create platform-specific installers in `frontend/src-tauri/target/rele
 ## 🏗️ Architecture
 
 ```
-Veswo Assistant
+veswo1-bot
 ├── Frontend (React + Tauri)
 │   ├── Modern UI with Tailwind CSS
 │   ├── Tabbed interface for different features
@@ -189,8 +189,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- **Issues**: [GitHub Issues](https://github.com/veswo/veswo-assistant/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/veswo/veswo-assistant/discussions)
+- **Issues**: [GitHub Issues](https://github.com/veswo/veswo1-bot/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/veswo/veswo1-bot/discussions)
 - **Email**: support@veswo.ai
 
 ---

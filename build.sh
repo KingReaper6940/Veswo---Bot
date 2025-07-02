@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Veswo Assistant Build Script
+# veswo1-bot Build Script
 # This script builds the complete application package
 
 set -e
 
-echo "🚀 Building Veswo Assistant..."
+echo "🚀 Building veswo1-bot..."
 
 # Colors for output
 RED='\033[0;31m'
@@ -88,7 +88,7 @@ if [ $? -eq 0 ]; then
     echo "  📦 Linux: frontend/src-tauri/target/release/bundle/deb/"
     
     echo ""
-    print_success "🎉 Veswo Assistant is ready for distribution!"
+    print_success "🎉 veswo1-bot is ready for distribution!"
     
     # Show file sizes
     echo ""

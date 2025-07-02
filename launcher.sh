@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Veswo Assistant Launcher
+# veswo1-bot Launcher
 # This script is used by the packaged Tauri app to start the backend
 
 set -e
@@ -9,7 +9,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 APP_DIR="$(dirname "$SCRIPT_DIR")"
 
-echo "🚀 Starting Veswo Assistant..."
+echo "🚀 Starting veswo1-bot..."
 
 # Check if we're in development mode or packaged mode
 if [ -d "$APP_DIR/backend" ]; then

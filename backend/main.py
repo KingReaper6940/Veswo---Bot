@@ -21,7 +21,7 @@ CORS_ORIGINS = json.loads(os.getenv("CORS_ORIGINS", '["http://localhost:3000", "
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Veswo Assistant API",
+    title="veswo1-bot API",
     description="AI-powered study assistant with Llama 3 7B for math solving, essay writing, and image analysis",
     version="1.0.0"
 )
@@ -101,7 +101,7 @@ class StatusResponse(BaseModel):
 async def root():
     """Root endpoint returning API information"""
     return {
-        "name": "Veswo Assistant API",
+        "name": "veswo1-bot API",
         "version": "1.0.0",
         "status": "operational" if llama_ready else "initializing",
         "description": "AI-powered study assistant with Llama 3 7B for math solving, essay writing, and image analysis",

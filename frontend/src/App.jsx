@@ -293,7 +293,7 @@ function App() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Initializing Veswo Assistant</h2>
+                      <h2 className="text-2xl font-bold text-gray-800 mb-2">Initializing veswo1-bot</h2>
           <p className="text-gray-600 mb-4">Loading Llama AI model...</p>
           {llamaStatus.error && (
             <p className="text-red-500 text-sm">Error: {llamaStatus.error}</p>
@@ -341,7 +341,7 @@ function App() {
               <AcademicCapIcon className="h-8 w-8 text-indigo-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Veswo Assistant</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">veswo1-bot</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Your AI Study Companion</p>
             </div>
           </div>
@@ -676,7 +676,7 @@ function App() {
           {activeTab === 'chat' && (
             <div className="space-y-4 text-center">
               <ChatBubbleLeftIcon className="mx-auto h-10 w-10 text-indigo-400" />
-              <h2 className="text-lg font-semibold text-gray-900">Welcome to Veswo Assistant</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Welcome to veswo1-bot</h2>
               <p className="text-sm text-gray-600">Start chatting or select a tool to get started!</p>
             </div>
           )}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Comprehensive test script for Veswo Assistant with GPT-2
+Comprehensive test script for veswo1-bot with GPT-2
 Tests all endpoints and functionality to ensure everything works correctly
 """
 
@@ -217,7 +217,7 @@ def wait_for_backend():
 
 def main():
     """Run all tests"""
-    print_status("🚀 Starting comprehensive Veswo Assistant tests...", "INFO")
+    print_status("🚀 Starting comprehensive veswo1-bot tests...", "INFO")
     print_status("=" * 50, "INFO")
     
     # Wait for backend
@@ -252,7 +252,7 @@ def main():
     print_status(f"🎯 Test Results: {passed}/{total} tests passed", "SUCCESS" if passed == total else "WARNING")
     
     if passed == total:
-        print_status("🎉 All tests passed! Veswo Assistant with GPT-2 is working correctly.", "SUCCESS")
+        print_status("🎉 All tests passed! veswo1-bot with GPT-2 is working correctly.", "SUCCESS")
         print_status("💡 You can now use the application with confidence.", "INFO")
     else:
         print_status("⚠️  Some tests failed. Please check the errors above.", "WARNING")

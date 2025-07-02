@@ -79,7 +79,7 @@ fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![chat])
         .setup(|app| {
-            println!("Veswo Assistant starting...");
+            println!("veswo1-bot starting...");
             println!("Backend server should be running on http://localhost:8000");
             Ok(())
         })

@@ -1,6 +1,6 @@
-# 📦 Veswo Assistant Packaging Guide
+# 📦 veswo1-bot Packaging Guide
 
-This guide explains how to package and distribute the Veswo Assistant application for different platforms.
+This guide explains how to package and distribute the veswo1-bot application for different platforms.
 
 ## 🎯 What We've Created
 
@@ -13,7 +13,7 @@ This guide explains how to package and distribute the Veswo Assistant applicatio
 - **icon.ico** - Windows application icon
 
 ### 🏗️ **Application Configuration**
-- **Product Name**: Veswo Assistant
+- **Product Name**: veswo1-bot
 - **Version**: 1.0.0
 - **Bundle ID**: com.veswo.assistant
 - **Category**: Education
@@ -93,7 +93,7 @@ npm run tauri build
 ## 📋 Package Contents
 
 Each package includes:
-- **Veswo Assistant** executable
+- **veswo1-bot** executable
 - **Custom icon** with modern gradient design
 - **All dependencies** (no external requirements)
 - **Backend integration** (Python FastAPI server)
@@ -231,7 +231,7 @@ Typical package sizes:
 
 For packaging issues:
 - Check [Tauri Documentation](https://tauri.app/docs)
-- Review [GitHub Issues](https://github.com/veswo/veswo-assistant/issues)
+- Review [GitHub Issues](https://github.com/veswo/veswo1-bot/issues)
 - Contact support team
 
 ---

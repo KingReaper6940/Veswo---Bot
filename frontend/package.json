@@ -1,5 +1,5 @@
 {
-  "name": "veswo-assistant",
+  "name": "veswo1-bot",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -9,7 +9,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/veswo/veswo-assistant"
+    "url": "https://github.com/veswo/veswo1-bot"
   },
   "homepage": "https://veswo.ai",
   "scripts": {
