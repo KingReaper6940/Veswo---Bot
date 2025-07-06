@@ -4,7 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "description": "AI-powered study assistant with math solving, essay writing, and image analysis",
-  "keywords": ["ai", "study", "assistant", "math", "essay", "image-analysis", "education"],
+  "keywords": [
+    "ai",
+    "study",
+    "assistant",
+    "math",
+    "essay",
+    "image-analysis",
+    "education"
+  ],
   "author": "Veswo Team",
   "license": "MIT",
   "repository": {
@@ -24,8 +32,10 @@
   "dependencies": {
     "@heroicons/react": "^2.0.18",
     "@tauri-apps/api": "^1.5.0",
+    "katex": "^0.16.22",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-katex": "^3.1.0"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.0",
@@ -41,4 +51,4 @@
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
   }
-} 
+}

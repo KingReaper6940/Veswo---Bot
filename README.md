@@ -4,6 +4,26 @@
 
 ---
 
+## ⚠️ System Requirements & Redistributables
+
+**Currently, Veswo Bot only supports macOS.** Windows and Linux support coming soon!
+
+Before running or building Veswo Bot, make sure your system has:
+
+- **macOS 10.13+** (required - Windows/Linux support planned)
+- **Python 3.8+** (required for backend)
+- **Node.js 16+ and npm** (required for frontend/build)
+- **Rust** (required for Tauri build)
+- **Ollama** (local LLM runner, auto-installed if missing)
+- **Homebrew** (recommended for auto-installing Ollama on macOS)
+
+> **Note:**
+> - The DMG/app will attempt to auto-install Python, Ollama, and dependencies on first run.
+> - If Homebrew is not present, you may need to install it manually from [https://brew.sh/](https://brew.sh/).
+> - If Python is missing, you may need to install it from [https://www.python.org/downloads/macos/](https://www.python.org/downloads/macos/).
+
+---
+
 ## ✨ Features
 
 - **Chat**: Natural language chat with a local LLM (Gemma AI via Ollama)

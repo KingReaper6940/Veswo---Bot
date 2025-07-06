@@ -35,12 +35,12 @@ async fn chat(message: String) -> Result<String, String> {
 async fn set_glass_mode(window: Window, enable: bool) -> Result<(), String> {
     if enable {
         window.set_decorations(false).map_err(|e| e.to_string())?;
-        window.set_transparent(true).map_err(|e| e.to_string())?;
         window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 350.0, height: 180.0 })).map_err(|e| e.to_string())?;
         window.set_always_on_top(true).map_err(|e| e.to_string())?;
+        // Note: In Tauri 1.5, transparency is handled via CSS and window config
+        // The window will appear transparent due to the CSS backdrop-filter
     } else {
         window.set_decorations(true).map_err(|e| e.to_string())?;
-        window.set_transparent(false).map_err(|e| e.to_string())?;
         window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 1200.0, height: 800.0 })).map_err(|e| e.to_string())?;
         window.set_always_on_top(false).map_err(|e| e.to_string())?;
     }
@@ -84,7 +84,8 @@ fn start_backend() -> std::process::Child {
     let launcher_path = if dev_launcher.exists() {
         dev_launcher.to_path_buf()
     } else {
-        app_dir.join("launcher.sh")
+        // In the app bundle, files are in Resources/_up_/_up_/
+        app_dir.join("_up_/_up_/launcher.sh")
     };
     
     println!("Starting backend with launcher: {:?}", launcher_path);

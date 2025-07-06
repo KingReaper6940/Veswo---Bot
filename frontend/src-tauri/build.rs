@@ -13,7 +13,7 @@ fn main() {
         bundle_path.push("bundle/macos/veswo1-bot.app/Contents/Resources");
 
         // Copy backend
-        let backend_src = PathBuf::from("../../backend");
+        let backend_src = PathBuf::from("../../../backend");
         let backend_dst = bundle_path.join("backend");
         if backend_src.exists() {
             let _ = fs::remove_dir_all(&backend_dst);
@@ -25,14 +25,14 @@ fn main() {
         }
 
         // Copy launcher.sh
-        let launcher_src = PathBuf::from("../../launcher.sh");
+        let launcher_src = PathBuf::from("../../../launcher.sh");
         let launcher_dst = bundle_path.join("launcher.sh");
         if launcher_src.exists() {
             let _ = fs::copy(&launcher_src, &launcher_dst);
         }
 
         // Copy requirements.txt
-        let reqs_src = PathBuf::from("../../requirements.txt");
+        let reqs_src = PathBuf::from("../../../requirements.txt");
         let reqs_dst = bundle_path.join("requirements.txt");
         if reqs_src.exists() {
             let _ = fs::copy(&reqs_src, &reqs_dst);

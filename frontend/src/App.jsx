@@ -177,7 +177,7 @@ function App() {
   // Minimal UI for glass mode
   if (glassMode) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-transparent" style={{height:'100vh',backdropFilter:'blur(0px)'}}>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-white/80 dark:bg-gray-900/80" style={{height:'100vh',backdropFilter:'blur(10px)'}}>
         <div className="flex items-center justify-between w-full px-2 py-1">
           <button onClick={()=>setGlassMode(false)} className="text-gray-500 hover:text-indigo-600"><EyeSlashIcon className="h-5 w-5"/></button>
           <span className="text-lg font-bold text-indigo-700">Veswo Bot</span>
@@ -218,7 +218,7 @@ function App() {
 
   // Normal UI rendering
   return (
-    <div className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900`} style={{height: '100vh'}}>
+    <div className={`min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900`} style={{height: '100vh', backgroundColor: darkMode ? '#18181b' : '#f9fafb'}}>
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4 border-b bg-white dark:bg-gray-800">
         <div className="flex items-center space-x-2">
