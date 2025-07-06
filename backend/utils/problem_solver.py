@@ -123,33 +123,43 @@ class ProblemSolver:
         """
         equations = []
         
-        # First, try to find explicit equations with = sign
-        if '=' in text:
-            # Split by = and try to create equation
-            parts = text.split('=')
-            if len(parts) == 2:
-                try:
-                    left = parts[0].strip()
-                    right = parts[1].strip()
-                    # Clean up the expressions
-                    left = left.replace(' ', '')  # Remove spaces
-                    right = right.replace(' ', '')
-                    equations.append(Eq(sympy.sympify(left), sympy.sympify(right)))
-                except:
-                    pass
+        # Look for patterns like "2x + 5 = 13" or "Solve for x: 2x + 5 = 13"
+        equation_patterns = [
+            r'(\d*[a-zA-Z]\s*[+\-*/]\s*\d+\s*=\s*\d+)',  # 2x + 5 = 13
+            r'(\d+\s*[+\-*/]\s*\d*[a-zA-Z]\s*=\s*\d+)',  # 5 + 2x = 13
+            r'([a-zA-Z]\s*[+\-*/]\s*\d+\s*=\s*\d+)',     # x + 5 = 13
+            r'(\d+\s*[+\-*/]\s*[a-zA-Z]\s*=\s*\d+)',     # 5 + x = 13
+        ]
         
-        # Also try the original pattern matching
-        for pattern in self.math_patterns.values():
+        for pattern in equation_patterns:
             matches = re.finditer(pattern, text)
             for match in matches:
                 try:
-                    # Try to parse as equation
-                    expr = match.group(1).strip()
-                    if '=' in expr:
-                        left, right = expr.split('=')
+                    equation_str = match.group(1).strip()
+                    if '=' in equation_str:
+                        left, right = equation_str.split('=')
+                        # Clean up the expressions
+                        left = left.strip().replace(' ', '')
+                        right = right.strip().replace(' ', '')
                         equations.append(Eq(sympy.sympify(left), sympy.sympify(right)))
-                except:
+                except Exception as e:
                     continue
+        
+        # If no equations found with patterns, try simple split
+        if not equations and '=' in text:
+            # Look for the part after "Solve for x:" or similar
+            if ':' in text:
+                parts = text.split(':')
+                if len(parts) > 1:
+                    equation_part = parts[1].strip()
+                    if '=' in equation_part:
+                        try:
+                            left, right = equation_part.split('=')
+                            left = left.strip().replace(' ', '')
+                            right = right.strip().replace(' ', '')
+                            equations.append(Eq(sympy.sympify(left), sympy.sympify(right)))
+                        except:
+                            pass
         
         return equations
     

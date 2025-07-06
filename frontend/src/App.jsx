@@ -28,7 +28,7 @@ function App() {
   const [essayType, setEssayType] = useState('analytical');
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [llamaStatus, setLlamaStatus] = useState({ ready: false, loading: true, error: null });
+  const [gemmaStatus, setGemmaStatus] = useState({ ready: false, loading: true, error: null });
   const [codeInput, setCodeInput] = useState('');
   const [codeQuestion, setCodeQuestion] = useState('');
   const [scienceSubject, setScienceSubject] = useState('physics');
@@ -49,9 +49,9 @@ function App() {
     };
   }, []);
 
-  // Check Llama status on component mount
+  // Check Gemma status on component mount
   useEffect(() => {
-    checkLlamaStatus();
+    checkGemmaStatus();
   }, []);
 
   useEffect(() => {
@@ -62,22 +62,22 @@ function App() {
     }
   }, [darkMode]);
 
-  const checkLlamaStatus = async () => {
+  const checkGemmaStatus = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/status');
       const data = await response.json();
       
-      if (data.llama_ready) {
-        setLlamaStatus({ ready: true, loading: false, error: null });
+      if (data.gemma_ready) {
+        setGemmaStatus({ ready: true, loading: false, error: null });
       } else {
-        setLlamaStatus({ ready: false, loading: true, error: data.error });
+        setGemmaStatus({ ready: false, loading: true, error: data.error });
         // Retry after 2 seconds
-        setTimeout(checkLlamaStatus, 2000);
+        setTimeout(checkGemmaStatus, 2000);
       }
     } catch (error) {
-      setLlamaStatus({ ready: false, loading: true, error: 'Cannot connect to backend' });
+      setGemmaStatus({ ready: false, loading: true, error: 'Cannot connect to backend' });
       // Retry after 2 seconds
-      setTimeout(checkLlamaStatus, 2000);
+      setTimeout(checkGemmaStatus, 2000);
     }
   };
 
@@ -204,27 +204,35 @@ function App() {
     
     setIsProcessing(true);
     try {
-      const formData = new FormData();
-      formData.append('image', selectedImage);
-      
-      const response = await fetch('http://localhost:8000/api/analyze/image', {
-        method: 'POST',
-        body: formData
-      });
+      // Convert image to base64 for API
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const imageData = e.target.result;
+        
+        const response = await fetch('http://localhost:8000/api/analyze/image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            image_data: imageData,
+            question: input || "What's in this image?"
+          })
+        });
 
-      const data = await response.json();
-      setMessages(prev => [...prev, 
-        { role: 'user', content: `[Image Analysis] ${input || "What's in this image?"}` },
-        { role: 'assistant', content: data.response, method: data.method }
-      ]);
-      setInput('');
+        const data = await response.json();
+        setMessages(prev => [...prev, 
+          { role: 'user', content: `[Image Analysis] ${input || "What's in this image?"}` },
+          { role: 'assistant', content: data.response, method: data.method }
+        ]);
+        setInput('');
+        setIsProcessing(false);
+      };
+      reader.readAsDataURL(selectedImage);
     } catch (error) {
       console.error('Error:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: 'Sorry, I encountered an error analyzing the image.' 
       }]);
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -287,16 +295,16 @@ function App() {
     { id: 'code', name: 'Code Helper', icon: CodeBracketIcon },
   ];
 
-  // Loading screen while Llama initializes
-  if (llamaStatus.loading) {
+  // Loading screen while Gemma initializes
+  if (gemmaStatus.loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                      <h2 className="text-2xl font-bold text-gray-800 mb-2">Initializing veswo1-bot</h2>
-          <p className="text-gray-600 mb-4">Loading Llama AI model...</p>
-          {llamaStatus.error && (
-            <p className="text-red-500 text-sm">Error: {llamaStatus.error}</p>
+                      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Initializing Gemma AI</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Loading Gemma AI model...</p>
+          {gemmaStatus.error && (
+            <p className="text-red-500 text-sm">Error: {gemmaStatus.error}</p>
           )}
           <div className="mt-4">
             <div className="flex space-x-2 justify-center">
@@ -311,17 +319,17 @@ function App() {
     );
   }
 
-  // Error screen if Llama failed to initialize
-  if (!llamaStatus.ready && llamaStatus.error) {
+  // Error screen if Gemma failed to initialize
+  if (!gemmaStatus.ready && gemmaStatus.error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-red-50 to-pink-100 flex items-center justify-center">
         <div className="text-center max-w-md">
           <div className="text-red-500 text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Initialization Failed</h2>
-          <p className="text-gray-600 mb-4">Llama model could not be loaded</p>
-          <p className="text-red-500 text-sm mb-4">{llamaStatus.error}</p>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Initialization Failed</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">Gemma model could not be loaded</p>
+          <p className="text-red-500 text-sm mb-4">{gemmaStatus.error}</p>
           <button 
-            onClick={checkLlamaStatus}
+            onClick={checkGemmaStatus}
             className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
           >
             Retry
@@ -341,7 +349,7 @@ function App() {
               <AcademicCapIcon className="h-8 w-8 text-indigo-600" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">veswo1-bot</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Gemma AI</h1>
               <p className="text-sm text-gray-500 dark:text-gray-400">Your AI Study Companion</p>
             </div>
           </div>
@@ -384,14 +392,14 @@ function App() {
       {/* Main Content */}
       <div className="flex-1 flex">
         {/* Left Panel - Chat History */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col bg-white dark:bg-gray-900">
           {/* Chat messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-white dark:bg-gray-900">
             {messages.length === 0 ? (
               <div className="text-center py-12">
-                <ChatBubbleLeftIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">No messages yet</h3>
-                <p className="mt-1 text-sm text-gray-500">
+                <ChatBubbleLeftIcon className="mx-auto h-12 w-12 text-gray-900 dark:text-gray-100" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">No messages yet</h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                   Start a conversation, upload an image, or use one of the tools below.
                 </p>
               </div>
@@ -406,8 +414,8 @@ function App() {
                   <div
                     className={`max-w-lg rounded-lg px-4 py-3 shadow-sm flex items-end space-x-2 ${
                       message.role === 'user'
-                        ? 'bg-indigo-600 text-white flex-row-reverse'
-                        : 'bg-white text-gray-900 border border-gray-200'
+                        ? 'bg-indigo-600 text-white dark:bg-indigo-400 dark:text-white flex-row-reverse'
+                        : 'bg-white text-gray-900 border border-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700'
                     }`}
                   >
                     {message.role === 'assistant' && (
@@ -420,7 +428,7 @@ function App() {
             )}
             {isProcessing && (
               <div className="flex justify-start">
-                <div className="bg-white text-gray-900 border border-gray-200 rounded-lg px-4 py-3 shadow-sm flex items-center space-x-2">
+                <div className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 shadow-sm flex items-center space-x-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-indigo-600"></div>
                   <span className="text-sm">Processing...</span>
                 </div>
@@ -429,20 +437,20 @@ function App() {
           </div>
 
           {/* Input form */}
-          <form onSubmit={handleSubmit} className="border-t bg-white p-4">
+          <form onSubmit={handleSubmit} className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
             <div className="flex space-x-4">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-colors"
+                className="flex-1 rounded-lg border border-gray-300 dark:border-gray-700 px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200 transition-colors"
                 disabled={isProcessing}
               />
               <button
                 type="submit"
                 disabled={isProcessing}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <PaperAirplaneIcon className="h-5 w-5" />
               </button>
@@ -451,14 +459,14 @@ function App() {
         </div>
 
         {/* Right Panel - Tools */}
-        <div className="w-80 bg-white border-l border-gray-200 p-6">
+        <div className="w-80 bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-800 p-6 text-gray-900 dark:text-gray-100">
           {activeTab === 'math' && (
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <CalculatorIcon className="h-6 w-6 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Math Problem Solver</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Math Problem Solver</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Enter a math problem and I'll help you solve it step by step.
               </p>
               <textarea
@@ -483,9 +491,9 @@ function App() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <DocumentTextIcon className="h-6 w-6 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Essay Writer</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Essay Writer</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Generate well-structured essays on any topic.
               </p>
               
@@ -545,9 +553,9 @@ function App() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <PhotoIcon className="h-6 w-6 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Image Analysis</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Image Analysis</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Upload an image or take a screenshot to analyze math problems, code, or anything else.
               </p>
               
@@ -601,9 +609,9 @@ function App() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <CodeBracketIcon className="h-6 w-6 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Code Helper</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Code Helper</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Get help with programming, debugging, and code explanations.
               </p>
               
@@ -639,9 +647,9 @@ function App() {
             <div className="space-y-4">
               <div className="flex items-center space-x-2">
                 <BeakerIcon className="h-6 w-6 text-indigo-600" />
-                <h2 className="text-lg font-semibold text-gray-900">Science Helper</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Science Helper</h2>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
                 Get help with physics, chemistry, and other science problems.
               </p>
               
@@ -676,15 +684,15 @@ function App() {
           {activeTab === 'chat' && (
             <div className="space-y-4 text-center">
               <ChatBubbleLeftIcon className="mx-auto h-10 w-10 text-indigo-400" />
-              <h2 className="text-lg font-semibold text-gray-900">Welcome to veswo1-bot</h2>
-              <p className="text-sm text-gray-600">Start chatting or select a tool to get started!</p>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Welcome to Gemma AI</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Start chatting or select a tool to get started!</p>
             </div>
           )}
         </div>
       </div>
       {/* Footer */}
       <footer className="w-full text-center py-2 text-xs text-gray-400 dark:text-gray-500 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-        Powered by Llama 3 7B
+        Powered by Gemma AI
       </footer>
     </div>
   );

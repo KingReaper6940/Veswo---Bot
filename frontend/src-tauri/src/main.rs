@@ -3,13 +3,14 @@
     windows_subsystem = "windows"
 )]
 
-use tauri::{CustomMenuItem, Manager};
 use reqwest;
 use serde_json::json;
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 use std::path::Path;
+use tauri::{Manager, RunEvent, WindowEvent};
+use std::sync::{Arc, Mutex};
 
 #[tauri::command]
 async fn chat(message: String) -> Result<String, String> {
@@ -28,6 +29,26 @@ async fn chat(message: String) -> Result<String, String> {
     let json: serde_json::Value = res.json().await.map_err(|e| e.to_string())?;
     let response = json.get("response").cloned().unwrap_or(json!("No response found")).to_string();
     Ok(response)
+}
+
+fn start_ollama() -> Option<std::process::Child> {
+    // Check if ollama is already running
+    if let Ok(output) = Command::new("pgrep").arg("ollama").output() {
+        if !output.stdout.is_empty() {
+            println!("Ollama is already running.");
+            return None;
+        }
+    }
+    println!("Starting Ollama server...");
+    let ollama_process = Command::new("ollama")
+        .arg("serve")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("Failed to start Ollama server");
+    // Give Ollama a few seconds to start
+    thread::sleep(Duration::from_secs(5));
+    Some(ollama_process)
 }
 
 fn start_backend() -> std::process::Child {
@@ -66,23 +87,55 @@ fn start_backend() -> std::process::Child {
     backend_process
 }
 
+#[allow(dead_code)]
+fn wait_for_backend_ready() -> bool {
+    for i in 0..30 {
+        if let Ok(resp) = reqwest::blocking::get("http://localhost:8000/api/status") {
+            if resp.status().is_success() {
+                if let Ok(text) = resp.text() {
+                    if text.contains("ready") {
+                        println!("✅ Backend is ready!");
+                        return true;
+                    }
+                }
+            }
+        }
+        println!("⏳ Waiting for backend to be ready... ({}/30)", i + 1);
+        thread::sleep(Duration::from_secs(2));
+    }
+    false
+}
+
 fn main() {
-    // Start the backend server in a separate thread
-    let backend_handle = thread::spawn(|| {
-        let mut backend_process = start_backend();
-        println!("Backend server started with PID: {}", backend_process.id());
-        
-        // Keep the backend running
-        let _ = backend_process.wait();
-    });
-    
+    // Start Ollama and backend, store handles in Arc<Mutex<Option<Child>>>
+    let ollama_handle = Arc::new(Mutex::new(start_ollama()));
+    let backend_handle = Arc::new(Mutex::new(Some(start_backend())));
+
+    let ollama_handle_clone = ollama_handle.clone();
+    let backend_handle_clone = backend_handle.clone();
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![chat])
         .setup(|app| {
-            println!("veswo1-bot starting...");
-            println!("Backend server should be running on http://localhost:8000");
+            let app_handle = app.handle();
+            // Listen for window close event
+            app_handle.listen_global("tauri://close-requested", move |_event| {
+                // Kill backend
+                if let Some(mut backend) = backend_handle_clone.lock().unwrap().take() {
+                    let _ = backend.kill();
+                }
+                // Kill Ollama
+                if let Some(mut ollama) = ollama_handle_clone.lock().unwrap().take() {
+                    let _ = ollama.kill();
+                }
+            });
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while running tauri application")
+        .run(|_app_handle, event| {
+            if let RunEvent::WindowEvent { event: WindowEvent::CloseRequested { .. }, .. } = event {
+                // This will trigger the close-requested event above
+            }
+        });
 } 
