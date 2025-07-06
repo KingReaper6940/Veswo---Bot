@@ -1,6 +1,6 @@
 # veswo1-bot 🧠
 
-An AI-powered study companion powered by **Meta Llama 3 7B** that helps with math problems, essay writing, code analysis, and image recognition - **100% local and private**.
+An AI-powered study companion powered by **Gemma AI ** that helps with math problems, essay writing, code analysis, and image recognition - **100% local and private**.
 
 ![veswo1-bot](https://img.shields.io/badge/Version-1.0.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
