@@ -9,7 +9,7 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::Duration;
 use std::path::Path;
-use tauri::{Manager, RunEvent, WindowEvent};
+use tauri::{Manager, RunEvent, WindowEvent, Window};
 use std::sync::{Arc, Mutex};
 
 #[tauri::command]
@@ -29,6 +29,22 @@ async fn chat(message: String) -> Result<String, String> {
     let json: serde_json::Value = res.json().await.map_err(|e| e.to_string())?;
     let response = json.get("response").cloned().unwrap_or(json!("No response found")).to_string();
     Ok(response)
+}
+
+#[tauri::command]
+async fn set_glass_mode(window: Window, enable: bool) -> Result<(), String> {
+    if enable {
+        window.set_decorations(false).map_err(|e| e.to_string())?;
+        window.set_transparent(true).map_err(|e| e.to_string())?;
+        window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 350.0, height: 180.0 })).map_err(|e| e.to_string())?;
+        window.set_always_on_top(true).map_err(|e| e.to_string())?;
+    } else {
+        window.set_decorations(true).map_err(|e| e.to_string())?;
+        window.set_transparent(false).map_err(|e| e.to_string())?;
+        window.set_size(tauri::Size::Logical(tauri::LogicalSize { width: 1200.0, height: 800.0 })).map_err(|e| e.to_string())?;
+        window.set_always_on_top(false).map_err(|e| e.to_string())?;
+    }
+    Ok(())
 }
 
 fn start_ollama() -> Option<std::process::Child> {
@@ -115,7 +131,7 @@ fn main() {
     let backend_handle_clone = backend_handle.clone();
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![chat])
+        .invoke_handler(tauri::generate_handler![chat, set_glass_mode])
         .setup(|app| {
             let app_handle = app.handle();
             // Listen for window close event
