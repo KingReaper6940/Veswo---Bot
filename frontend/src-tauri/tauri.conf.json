@@ -1,15 +1,15 @@
 {
-  "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist"
-  },
-  "package": {
-    "productName": "veswo1-bot",
-    "version": "1.0.0"
-  },
   "tauri": {
+    "build": {
+      "beforeDevCommand": "npm run dev",
+      "beforeBuildCommand": "npm run build",
+      "devPath": "http://localhost:1420",
+      "distDir": "../dist"
+    },
+    "package": {
+      "productName": "veswo1-bot",
+      "version": "1.0.0"
+    },
     "allowlist": {
       "all": false,
       "shell": {
@@ -62,7 +62,7 @@
       "copyright": "Copyright (c) 2024 Veswo Team",
       "category": "Education",
       "shortDescription": "AI Study Assistant",
-              "longDescription": "veswo1-bot is an AI-powered study companion that helps with math problems, essay writing, code analysis, and image recognition.",
+      "longDescription": "veswo1-bot is an AI-powered study companion that helps with math problems, essay writing, code analysis, and image recognition.",
       "deb": {
         "depends": ["python3", "python3-pip"]
       },
@@ -93,10 +93,12 @@
         "minWidth": 800,
         "minHeight": 600,
         "decorations": true,
-        "transparent": false,
+        "transparent": true,
         "center": true,
         "visible": true,
-        "alwaysOnTop": false
+        "alwaysOnTop": false,
+        "skipTaskbar": false,
+        "titleBarStyle": "default"
       }
     ]
   }

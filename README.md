@@ -31,10 +31,14 @@ Before running or building Veswo Bot, make sure your system has:
 - **Essay Writer**: Generate essays on any topic (LLM-powered)
 - **Science Helper**: Physics, chemistry, biology Q&A
 - **Code Helper**: Code explanations, debugging, and generation
-- **Image OCR**: Upload images and extract text instantly
-- **Glass Mode**: Minimal, transparent always-on-top widget for multitasking
+- **Glass Mode**: Minimal, transparent, draggable always-on-top widget for multitasking
 - **Dark/Light Mode**: Toggle for comfortable day or night use
 - **100% Local**: No data leaves your device
+
+> **Coming Soon:**
+> - Screenshot capture and analysis
+> - Image OCR functionality
+> - Windows and Linux support
 
 ---
 
@@ -42,14 +46,14 @@ Before running or building Veswo Bot, make sure your system has:
 
 ```
 Veswo---Bot/
-├── backend/                # FastAPI backend (Python, LLM, OCR)
-│   └── utils/              # (Legacy) Math, essay, OCR helpers
+├── backend/                # FastAPI backend (Python, LLM)
+│   └── utils/              # AI model and utility functions
 ├── frontend/               # React + Tauri frontend
 │   ├── src/                # Main React app (App.jsx, components, styles)
 │   └── src-tauri/          # Tauri Rust backend, config, icons
 ├── launcher.sh             # Robust backend/venv/Ollama launcher
 ├── requirements.txt        # Python dependencies
-├── clean_tauri_build.sh    # Clean build script for DMG
+├── build.sh                # Build script for DMG
 ├── README.md               # (This file)
 └── ...                     # Other scripts, docs, and configs
 ```
@@ -63,7 +67,7 @@ Veswo---Bot/
 3. **Launch Veswo Bot**
    - On first run, dependencies (Python, venv, pip, Ollama, model) are auto-installed if needed
    - If anything is missing, you'll see a macOS popup with instructions
-4. **Start chatting, solving math, writing essays, or using OCR!**
+4. **Start chatting, solving math, writing essays, or using any feature!**
 
 ---
 
@@ -77,8 +81,8 @@ Veswo---Bot/
 
 2. **Run a clean build:**
    ```sh
-   chmod +x clean_tauri_build.sh
-   ./clean_tauri_build.sh
+   chmod +x build.sh
+   ./build.sh
    ```
    - This will build the Tauri app and DMG, always including the backend and all dependencies.
 
@@ -95,8 +99,7 @@ Veswo---Bot/
 - **Essay Writer**: Ask for essays on any topic — the LLM handles everything.
 - **Science Helper**: Ask science questions (physics, chemistry, biology).
 - **Code Helper**: Paste code or ask for code explanations/generation.
-- **Image Analysis (OCR)**: Upload an image, click "Extract Text" to get instant OCR.
-- **Glass Mode**: Click the eye icon in the header for a minimal, transparent always-on-top widget. Great for multitasking!
+- **Glass Mode**: Click the eye icon in the header for a minimal, transparent, draggable always-on-top widget. Great for multitasking!
 - **Dark/Light Mode**: Click the moon/sun icon to toggle.
 
 ---
@@ -111,14 +114,14 @@ Veswo---Bot/
 
 ## 📦 Dependencies
 - **Frontend**: React, Tauri, Tailwind CSS, KaTeX (LaTeX rendering)
-- **Backend**: FastAPI, Python, pytesseract (OCR), Pillow, Ollama, Gemma AI model
+- **Backend**: FastAPI, Python, Ollama, Gemma AI model
 - **Build**: Node.js, Rust, npm, pip
 
 ---
 
 ## 🤝 Contributing
 - Fork the repo, create a branch, submit a PR!
-- See `clean_tauri_build.sh` for the recommended build process.
+- See `build.sh` for the recommended build process.
 
 ---
 
@@ -128,7 +131,6 @@ Veswo---Bot/
 - **Tauri** — Cross-platform desktop framework
 - **FastAPI** — High-performance Python backend
 - **KaTeX** — Beautiful math rendering
-- **pytesseract** — OCR
 
 ---
 
